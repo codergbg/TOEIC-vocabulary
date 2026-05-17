@@ -281,6 +281,29 @@
             border-top: 1px solid var(--border-color);
         }
 
+        .speak-word-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: white;
+            box-shadow: 0 4px 15px var(--glow);
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            margin-left: 12px;
+        }
+
+        .speak-word-btn:active {
+            transform: scale(0.9);
+        }
+
+        .speak-word-btn.playing {
+            animation: pulse 0.8s infinite;
+        }
+
         .card-hint {
             text-align: center;
             color: var(--text-muted);
@@ -963,8 +986,13 @@
             <div id="word-container">
                 <div class="word-card" id="word-card" onclick="flipCard()">
                     <div class="word-main">
-                        <div class="word" id="word-text"></div>
-                        <div class="phonetic" id="phonetic"></div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <div class="word" id="word-text"></div>
+                                <div class="phonetic" id="phonetic"></div>
+                            </div>
+                            <button class="speak-word-btn" onclick="speakCurrentWord(event)" id="speak-word-btn">🔊</button>
+                        </div>
                     </div>
                     <div class="word-meaning" id="meaning" style="display: none;"></div>
                     <div class="word-example" id="example" style="display: none;"></div>
@@ -1807,6 +1835,32 @@
             }
         }
 
+        // 发音学习页面的当前单词
+        function speakCurrentWord(e) {
+            if (e) e.stopPropagation();
+            const words = getDailyWords();
+            if (state.currentIndex >= words.length) return;
+
+            const word = words[state.currentIndex];
+            const btn = document.getElementById('speak-word-btn');
+            if (btn) btn.classList.add('playing');
+
+            speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(word.word);
+            utterance.lang = 'en-US';
+            utterance.rate = state.speechRate;
+            utterance.volume = 1;
+
+            utterance.onend = () => {
+                if (btn) btn.classList.remove('playing');
+            };
+            utterance.onerror = () => {
+                if (btn) btn.classList.remove('playing');
+            };
+
+            setTimeout(() => speechSynthesis.speak(utterance), 100);
+        }
+
         function flipCard() {
             const meaning = document.getElementById('meaning');
             const example = document.getElementById('example');
@@ -1879,12 +1933,24 @@
             const btn = document.getElementById('speak-btn');
             btn.classList.add('playing');
 
+            // 移动端兼容：先停止之前的播放
+            speechSynthesis.cancel();
+
             const utterance = new SpeechSynthesisUtterance(state.currentPracticeWord.word);
             utterance.lang = 'en-US';
             utterance.rate = state.speechRate;
+            utterance.volume = 1;
 
             utterance.onend = () => btn.classList.remove('playing');
-            speechSynthesis.speak(utterance);
+            utterance.onerror = (e) => {
+                console.log('Speech error:', e);
+                btn.classList.remove('playing');
+            };
+
+            // 移动端需要短暂延迟确保音频上下文就绪
+            setTimeout(() => {
+                speechSynthesis.speak(utterance);
+            }, 100);
         }
 
         function setSpeed(speed) {
@@ -2012,9 +2078,17 @@
         }
 
         function playQuestionAudio() {
+            // 移动端兼容：先停止之前的播放
+            speechSynthesis.cancel();
+
             const utterance = new SpeechSynthesisUtterance(state.testQuestions[state.currentQuestion].correct.word);
             utterance.lang = 'en-US';
-            speechSynthesis.speak(utterance);
+            utterance.rate = 0.9;
+            utterance.volume = 1;
+
+            setTimeout(() => {
+                speechSynthesis.speak(utterance);
+            }, 100);
         }
 
         function selectOption(word) {
