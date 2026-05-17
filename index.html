@@ -1835,24 +1835,6 @@
             }
         }
 
-        // 语音合成初始化（解决移动端问题）
-        let speechInitialized = false;
-        function initSpeech() {
-            if (speechInitialized) return;
-            // 尝试获取语音列表，触发移动端音频上下文
-            const voices = speechSynthesis.getVoices();
-            if (voices.length > 0) {
-                speechInitialized = true;
-            }
-            // 即使没有语音也标记为已尝试
-            speechInitialized = true;
-        }
-
-        // 页面加载时尝试初始化语音
-        window.addEventListener('load', initSpeech);
-        window.addEventListener('touchstart', initSpeech, { once: true });
-        window.addEventListener('click', initSpeech, { once: true });
-
         // 发音学习页面的当前单词
         function speakCurrentWord(e) {
             if (e) e.stopPropagation();
@@ -1864,28 +1846,19 @@
             if (btn) btn.classList.add('playing');
 
             speechSynthesis.cancel();
-
-            // 等待语音列表加载（移动端需要）
-            const voices = speechSynthesis.getVoices();
-            const enVoice = voices.find(v => v.lang.includes('en')) || voices[0];
-
             const utterance = new SpeechSynthesisUtterance(word.word);
             utterance.lang = 'en-US';
-            if (enVoice) utterance.voice = enVoice;
             utterance.rate = state.speechRate;
-            utterance.pitch = 1;
             utterance.volume = 1;
 
             utterance.onend = () => {
                 if (btn) btn.classList.remove('playing');
             };
-            utterance.onerror = (e) => {
-                console.log('Speech error:', e.error);
+            utterance.onerror = () => {
                 if (btn) btn.classList.remove('playing');
             };
 
-            // 移动端：确保在用户交互后立即播放
-            speechSynthesis.speak(utterance);
+            setTimeout(() => speechSynthesis.speak(utterance), 100);
         }
 
         function flipCard() {
@@ -1960,17 +1933,12 @@
             const btn = document.getElementById('speak-btn');
             btn.classList.add('playing');
 
+            // 移动端兼容：先停止之前的播放
             speechSynthesis.cancel();
-
-            // 获取可用的语音
-            const voices = speechSynthesis.getVoices();
-            const enVoice = voices.find(v => v.lang.includes('en')) || voices[0];
 
             const utterance = new SpeechSynthesisUtterance(state.currentPracticeWord.word);
             utterance.lang = 'en-US';
-            if (enVoice) utterance.voice = enVoice;
             utterance.rate = state.speechRate;
-            utterance.pitch = 1;
             utterance.volume = 1;
 
             utterance.onend = () => btn.classList.remove('playing');
@@ -1979,8 +1947,9 @@
                 btn.classList.remove('playing');
             };
 
-            // 移动端直接播放
-            speechSynthesis.speak(utterance);
+            // 移动端需要短暂延迟确保音频上下文就绪
+            setTimeout(() => {
+                speechSynthesis.speak(utterance);
             }, 100);
         }
 
@@ -2109,20 +2078,16 @@
         }
 
         function playQuestionAudio() {
+            // 移动端兼容：先停止之前的播放
             speechSynthesis.cancel();
-
-            // 获取可用的语音
-            const voices = speechSynthesis.getVoices();
-            const enVoice = voices.find(v => v.lang.includes('en')) || voices[0];
 
             const utterance = new SpeechSynthesisUtterance(state.testQuestions[state.currentQuestion].correct.word);
             utterance.lang = 'en-US';
-            if (enVoice) utterance.voice = enVoice;
             utterance.rate = 0.9;
-            utterance.pitch = 1;
             utterance.volume = 1;
 
-            speechSynthesis.speak(utterance);
+            setTimeout(() => {
+                speechSynthesis.speak(utterance);
             }, 100);
         }
 
