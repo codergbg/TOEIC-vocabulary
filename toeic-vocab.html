@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>托业单词通 - TOEIC Vocabulary</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f0f23;
+            --secondary: #1a1a3e;
+            --card-bg: #16213e;
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --accent-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
+            --success: #10b981;
+            --success-light: #34d399;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --btn-bg: #1e293b;
+            --border-color: #334155;
+            --glow: rgba(99, 102, 241, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(30, 41, 59, 0.5) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .app-container {
+            max-width: 520px;
+            margin: 0 auto;
+            min-height: 100vh;
+            padding-bottom: 80px;
+            position: relative;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(26, 26, 62, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 20px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .header-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .header-stat-icon {
+            font-size: 14px;
+        }
+
+        .header .subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Page transitions */
+        .page {
+            display: none;
+            padding: 24px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* Progress */
+        .progress-container {
+            margin-bottom: 24px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .progress-count {
+            font-size: 14px;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            background: var(--btn-bg);
+            border-radius: 12px;
+            height: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            background: var(--accent-gradient);
+            height: 100%;
+            border-radius: 12px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        /* Word Card */
+        .word-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow:
+                0 10px 40px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(99, 102, 241, 0.1);
+            margin-bottom: 24px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .word-card:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.4),
+                0 0 30px var(--glow);
+        }
+
+        .word-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-gradient);
+        }
+
+        .word-card.flipped::before {
+            background: linear-gradient(90deg, var(--success), var(--accent-light));
+        }
+
+        .word-main {
+            margin-bottom: 20px;
+        }
+
+        .word {
+            font-family: 'Poppins', sans-serif;
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .phonetic {
+            font-size: 18px;
+            color: var(--accent);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+        }
+
+        .word-meaning {
+            font-size: 20px;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            padding: 20px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 14px;
+            border-left: 4px solid var(--accent);
+            line-height: 1.6;
+        }
+
+        .word-example {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            padding: 16px;
+            background: var(--btn-bg);
+            border-radius: 12px;
+            font-style: italic;
+        }
+
+        .word-example-cn {
+            font-size: 14px;
+            color: var(--warning);
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .card-hint {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-top: 12px;
+        }
+
+        /* Action Buttons */
+        .card-actions {
+            display: flex;
+            gap: 14px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Noto Sans SC', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-know {
+            background: var(--success);
+            color: #0f172a;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-know:hover {
+            background: var(--success-light);
+            box-shadow: 0 6px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-dont-know {
+            background: var(--btn-bg);
+            color: var(--text-secondary);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-dont-know:hover {
+            border-color: var(--text-muted);
+            color: var(--text-primary);
+        }
+
+        .btn-next {
+            background: var(--accent-gradient);
+            color: white;
+            width: 100%;
+            margin-top: 16px;
+            box-shadow: 0 4px 20px var(--glow);
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px var(--glow);
+        }
+
+        /* Completed State */
+        .completed-state {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .completed-icon {
+            font-size: 72px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        .completed-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .completed-subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .completed-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 32px;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .mini-stat {
+            background: var(--btn-bg);
+            padding: 20px;
+            border-radius: 14px;
+            text-align: center;
+        }
+
+        .mini-stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .mini-stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Navigation */
+        .navigation {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 62, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 70px;
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
+            z-index: 1000;
+            padding: 0 16px;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-muted);
+            text-decoration: none;
+            position: relative;
+            border-radius: 12px;
+        }
+
+        .nav-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Practice Page */
+        .page-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .practice-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px 24px;
+            text-align: center;
+            margin-bottom: 28px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .practice-card .word {
+            font-size: 42px;
+            margin-bottom: 12px;
+        }
+
+        .practice-card .phonetic {
+            font-size: 20px;
+        }
+
+        .speak-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .speak-btn {
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+            box-shadow: 0 8px 30px var(--glow);
+            transition: all 0.3s ease;
+        }
+
+        .speak-btn:active {
+            transform: scale(0.92);
+        }
+
+        .speak-btn.playing {
+            animation: pulse 0.8s infinite;
+        }
+
+        .speed-control {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .speed-btn {
+            padding: 10px 20px;
+            border-radius: 24px;
+            border: 2px solid var(--border-color);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .speed-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .speed-btn.active {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--accent);
+        }
+
+        .record-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .record-btn {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: var(--btn-bg);
+            border: 3px solid var(--accent);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: var(--accent);
+            transition: all 0.3s ease;
+        }
+
+        .record-btn:hover {
+            background: rgba(99, 102, 241, 0.15);
+        }
+
+        .record-btn.recording {
+            background: var(--accent);
+            color: white;
+            animation: pulse 1s infinite;
+            box-shadow: 0 0 30px var(--glow);
+        }
+
+        .record-hint {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .playback-btn {
+            padding: 12px 28px;
+            background: var(--success);
+            color: #0f172a;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: none;
+            transition: all 0.3s ease;
+        }
+
+        .playback-btn:hover {
+            background: var(--success-light);
+        }
+
+        /* Test Page */
+        .test-mode {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .test-mode-btn {
+            flex: 1;
+            padding: 18px;
+            border-radius: 14px;
+            border: 2px solid var(--border-color);
+            background: var(--btn-bg);
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .test-mode-btn:hover {
+            border-color: var(--accent);
+            color: var(--text-primary);
+        }
+
+        .test-mode-btn.active {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--accent);
+        }
+
+        .test-question {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .question-number {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .question-progress {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .question-text {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 28px;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .question-audio {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .audio-play-btn {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            border: none;
+            cursor: pointer;
+            font-size: 28px;
+            color: white;
+            box-shadow: 0 6px 24px var(--glow);
+            transition: all 0.3s ease;
+        }
+
+        .audio-play-btn:active {
+            transform: scale(0.92);
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 18px;
+            border: 2px solid var(--border-color);
+            border-radius: 14px;
+            background: var(--btn-bg);
+            color: var(--text-primary);
+            font-size: 18px;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .answer-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--glow);
+        }
+
+        .answer-input.correct {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .answer-input.incorrect {
+            border-color: var(--error);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .option-btn {
+            padding: 18px 16px;
+            border-radius: 14px;
+            border: 2px solid var(--border-color);
+            background: var(--btn-bg);
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .option-btn:active {
+            transform: scale(0.96);
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option-btn.correct {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .option-btn.incorrect {
+            border-color: var(--error);
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+        }
+
+        /* Results */
+        .result-summary {
+            text-align: center;
+            padding: 40px 24px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            margin-bottom: 28px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-score {
+            font-size: 72px;
+            font-weight: 800;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .result-label {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin: 16px 0 28px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .stat-item {
+            background: var(--btn-bg);
+            padding: 20px;
+            border-radius: 14px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* History */
+        .history-section {
+            margin-top: 28px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card h3 {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            background: var(--btn-bg);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .history-date {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .history-score {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .history-mode {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-left: 8px;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 56px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+        }
+
+        /* Dictation submit button */
+        .submit-btn {
+            margin-top: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .app-container {
+                max-width: 100%;
+            }
+
+            .word {
+                font-size: 30px;
+            }
+
+            .practice-card .word {
+                font-size: 36px;
+            }
+
+            .options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div class="header-content">
+                <div>
+                    <h1>托业单词通</h1>
+                    <div class="subtitle">每天进步一点点</div>
+                </div>
+                <div class="header-stats">
+                    <div class="header-stat">
+                        <span class="header-stat-icon">📚</span>
+                        <span id="total-words">0</span>
+                    </div>
+                    <div class="header-stat">
+                        <span class="header-stat-icon">✅</span>
+                        <span id="learned-count">0</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Learn Page -->
+        <div id="learn-page" class="page active">
+            <div class="progress-container">
+                <div class="progress-header">
+                    <span class="progress-text">今日进度</span>
+                    <span class="progress-count"><span id="learn-progress">0</span>/10</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div id="word-container">
+                <div class="word-card" id="word-card" onclick="flipCard()">
+                    <div class="word-main">
+                        <div class="word" id="word-text"></div>
+                        <div class="phonetic" id="phonetic"></div>
+                    </div>
+                    <div class="word-meaning" id="meaning" style="display: none;"></div>
+                    <div class="word-example" id="example" style="display: none;"></div>
+                    <div class="word-example-cn" id="example-cn" style="display: none;"></div>
+                    <div class="card-hint">点击卡片显示释义和例句</div>
+                </div>
+                <div class="card-actions">
+                    <button class="btn btn-dont-know" onclick="markDontKnow()">不认识</button>
+                    <button class="btn btn-know" onclick="markKnow()">认识</button>
+                </div>
+            </div>
+
+            <div id="completed-msg" class="completed-state" style="display: none;">
+                <div class="completed-icon">🎉</div>
+                <h2 class="completed-title">今日学习完成！</h2>
+                <p class="completed-subtitle">你已经学完了今天的所有单词</p>
+                <div class="completed-badge">
+                    <span>✓</span> 已掌握 <span id="mastered-count">0</span> 个单词
+                </div>
+                <div class="stats-row">
+                    <div class="mini-stat">
+                        <div class="mini-stat-value" id="total-learned">0</div>
+                        <div class="mini-stat-label">总学习词数</div>
+                    </div>
+                    <div class="mini-stat">
+                        <div class="mini-stat-value" id="remaining-words">0</div>
+                        <div class="mini-stat-label">剩余词数</div>
+                    </div>
+                </div>
+                <button class="btn btn-next" onclick="startOver()">重新学习</button>
+            </div>
+        </div>
+
+        <!-- Practice Page -->
+        <div id="practice-page" class="page">
+            <div class="page-title">发音练习</div>
+
+            <div class="practice-card">
+                <div class="word" id="practice-word">点击开始</div>
+                <div class="phonetic" id="practice-phonetic"></div>
+            </div>
+
+            <div class="speak-controls">
+                <button class="speak-btn" onclick="speakWord()" id="speak-btn">
+                    🔊
+                </button>
+                <div class="speed-control">
+                    <button class="speed-btn" data-speed="0.5" onclick="setSpeed(0.5)">0.5x</button>
+                    <button class="speed-btn active" data-speed="1" onclick="setSpeed(1)">1x</button>
+                    <button class="speed-btn" data-speed="1.5" onclick="setSpeed(1.5)">1.5x</button>
+                </div>
+            </div>
+
+            <div class="record-section">
+                <button class="record-btn" id="record-btn" onclick="toggleRecording()">
+                    🎤
+                </button>
+                <p class="record-hint">点击录音，对比发音</p>
+                <button class="playback-btn" id="playback-btn" onclick="playRecording()">
+                    ▶ 播放录音
+                </button>
+            </div>
+
+            <div style="margin-top: 32px;">
+                <button class="btn btn-next" onclick="nextPracticeWord()">下一个单词</button>
+            </div>
+        </div>
+
+        <!-- Test Page -->
+        <div id="test-page" class="page">
+            <div class="page-title">单词测试</div>
+
+            <div id="test-start">
+                <div class="stat-card">
+                    <h3>选择测试模式</h3>
+                </div>
+                <div class="test-mode">
+                    <button class="test-mode-btn active" data-mode="choice" onclick="selectTestMode('choice')">
+                        选择题
+                    </button>
+                    <button class="test-mode-btn" data-mode="dictation" onclick="selectTestMode('dictation')">
+                        听力拼写
+                    </button>
+                </div>
+                <button class="btn btn-next" onclick="startTest()">开始测试</button>
+
+                <div class="history-section">
+                    <div class="stat-card">
+                        <h3>历史成绩</h3>
+                        <div class="history-list" id="history-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="test-content" style="display: none;">
+                <div class="test-question">
+                    <div class="question-number">
+                        <span>第 <span id="question-num">1</span> / 10 题</span>
+                        <span class="question-progress" id="test-progress">1/10</span>
+                    </div>
+
+                    <div class="question-text" id="question-text"></div>
+
+                    <div class="question-audio" id="question-audio" style="display: none;">
+                        <button class="audio-play-btn" onclick="playQuestionAudio()">🔊</button>
+                    </div>
+
+                    <div id="dictation-input-area" style="display: none;">
+                        <input type="text" class="answer-input" id="answer-input" placeholder="输入单词..." autocomplete="off">
+                        <button class="btn btn-next submit-btn" onclick="submitDictation()">提交</button>
+                    </div>
+
+                    <div class="options" id="options-container" style="display: none;"></div>
+                </div>
+            </div>
+
+            <div id="test-result" style="display: none;">
+                <div class="result-summary">
+                    <div class="result-score" id="result-score">0%</div>
+                    <div class="result-label">测试完成！</div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="correct-count">0</div>
+                            <div class="stat-label">正确数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="wrong-count">0</div>
+                            <div class="stat-label">错误数</div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-next" onclick="backToTestStart()">再来一次</button>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="navigation">
+            <div class="nav-item active" data-page="learn" onclick="switchPage('learn')">
+                <span class="nav-icon">📚</span>
+                <span class="nav-label">学习</span>
+            </div>
+            <div class="nav-item" data-page="practice" onclick="switchPage('practice')">
+                <span class="nav-icon">🎤</span>
+                <span class="nav-label">练习</span>
+            </div>
+            <div class="nav-item" data-page="test" onclick="switchPage('test')">
+                <span class="nav-icon">✏️</span>
+                <span class="nav-label">测试</span>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        const VOCABULARY = [
+            // A
+            { word: "ability", phonetic: "/əˈbɪləti/", meaning: "能力", example: "She has the ability to speak three languages.", exampleCn: "她有说三种语言的能力。" },
+            { word: "absorb", phonetic: "/əbˈzɔːrb/", meaning: "吸收", example: "Plants absorb water from the soil.", exampleCn: "植物从土壤中吸收水分。" },
+            { word: "academic", phonetic: "/ˌækəˈdemɪk/", meaning: "学术的", example: "The university has strong academic programs.", exampleCn: "这所大学有强大的学术项目。" },
+            { word: "accept", phonetic: "/əkˈsept/", meaning: "接受", example: "Please accept my sincere apologies.", exampleCn: "请接受我真诚的道歉。" },
+            { word: "access", phonetic: "/ˈækses/", meaning: "进入；访问", example: "You need a password to access the system.", exampleCn: "你需要密码来访问系统。" },
+            { word: "accommodation", phonetic: "/əˌkɑːməˈdeɪʃn/", meaning: "住宿", example: "The hotel provides comfortable accommodation.", exampleCn: "这家酒店提供舒适的住宿。" },
+            { word: "accompany", phonetic: "/əˈkʌmpəni/", meaning: "陪伴", example: "She accompanied her client to the meeting.", exampleCn: "她陪同她的客户参加了会议。" },
+            { word: "accomplish", phonetic: "/əˈkʌmplɪʃ/", meaning: "完成", example: "We accomplished our goal ahead of schedule.", exampleCn: "我们提前完成了目标。" },
+            { word: "account", phonetic: "/əˈkaʊnt/", meaning: "账户；叙述", example: "Please open a new bank account.", exampleCn: "请开一个新的银行账户。" },
+            { word: "accurate", phonetic: "/ˈækjərət/", meaning: "准确的", example: "The report contains accurate information.", exampleCn: "报告包含准确的信息。" },
+            { word: "achieve", phonetic: "/əˈtʃiːv/", meaning: "达到；获得", example: "She achieved excellent results in her exams.", exampleCn: "她在考试中取得了优异的成绩。" },
+            { word: "acknowledge", phonetic: "/əkˈnɑːlɪdʒ/", meaning: "承认；认可", example: "We acknowledge receipt of your letter.", exampleCn: "我们确认收到您的信。" },
+            { word: "acquire", phonetic: "/əˈkwaɪər/", meaning: "获得", example: "The company acquired new premises last year.", exampleCn: "该公司去年获得了新的场所。" },
+            { word: "adapt", phonetic: "/əˈdæpt/", meaning: "适应；改编", example: "It took her a while to adapt to her new job.", exampleCn: "她花了一段时间适应新工作。" },
+            { word: "adequate", phonetic: "/ˈædɪkwət/", meaning: "足够的", example: "The supplies are adequate for the project.", exampleCn: "用品足够这个项目使用。" },
+            { word: "adjacent", phonetic: "/əˈdʒeɪsnt/", meaning: "相邻的", example: "The hotel is adjacent to the train station.", exampleCn: "酒店位于火车站附近。" },
+            { word: "adjust", phonetic: "/əˈdʒʌst/", meaning: "调整", example: "Please adjust your schedule to accommodate the meeting.", exampleCn: "请调整您的日程以配合会议。" },
+            { word: "administer", phonetic: "/ədˈmɪnɪstər/", meaning: "管理；执行", example: "The HR department administers employee benefits.", exampleCn: "人力资源部管理员工福利。" },
+            { word: "adopt", phonetic: "/əˈdɑːpt/", meaning: "采用；收养", example: "The committee adopted a new policy.", exampleCn: "委员会采用了新政策。" },
+            { word: "advance", phonetic: "/ədˈvæns/", meaning: "前进；进步", example: "The project shows significant advance.", exampleCn: "该项目取得了重大进展。" },
+            { word: "advantage", phonetic: "/ədˈvæntɪdʒ/", meaning: "优势", example: "There are many advantages to working from home.", exampleCn: "在家工作有很多优势。" },
+            { word: "advertise", phonetic: "/ˈædvərtaɪz/", meaning: "做广告", example: "We need to advertise the new product.", exampleCn: "我们需要为新产品做广告。" },
+            { word: "advocate", phonetic: "/ˈædvəkeɪt/", meaning: "提倡；主张", example: "She advocates for environmental protection.", exampleCn: "她提倡环境保护。" },
+            { word: "affect", phonetic: "/əˈfekt/", meaning: "影响", example: "The weather will affect our travel plans.", exampleCn: "天气会影响我们的旅行计划。" },
+            { word: "afford", phonetic: "/əˈfɔːrd/", meaning: "负担得起", example: "We can't afford to ignore this opportunity.", exampleCn: "我们不能错过这个机会。" },
+            { word: "agency", phonetic: "/ˈeɪdʒənsi/", meaning: "代理；机构", example: "She works for a travel agency.", exampleCn: "她在一家旅行社工作。" },
+            { word: "agenda", phonetic: "/əˈdʒendə/", meaning: "议程", example: "Let's add this item to the agenda.", exampleCn: "让我们把这个项目加到议程上。" },
+            { word: "aggregate", phonetic: "/ˈæɡrɪɡət/", meaning: "合计；聚集", example: "The aggregate score was very high.", exampleCn: "总分非常高。" },
+            { word: "aid", phonetic: "/eɪd/", meaning: "帮助；援助", example: "First aid is essential in emergencies.", exampleCn: "急救在紧急情况下是必不可少的。" },
+            { word: "albeit", phonetic: "/ˌɔːlˈbiːɪt/", meaning: "虽然", example: "It was a good job, albeit challenging.", exampleCn: "这是一份好工作，虽然有挑战。" },
+            { word: "allocate", phonetic: "/ˈæləkeɪt/", meaning: "分配", example: "We need to allocate more resources to this project.", exampleCn: "我们需要为这个项目分配更多资源。" },
+            { word: "alter", phonetic: "/ˈɔːltər/", meaning: "改变", example: "You may alter your travel plans if needed.", exampleCn: "如需要您可以改变旅行计划。" },
+            { word: "alternative", phonetic: "/ɔːlˈtɜːrnətɪv/", meaning: "替代品；选择", example: "Is there an alternative route we can take?", exampleCn: "我们有没有其他路线？" },
+            { word: "amateur", phonetic: "/ˈæmətʃər/", meaning: "业余爱好者", example: "He's an amateur photographer.", exampleCn: "他是一位业余摄影师。" },
+            { word: "ambiguous", phonetic: "/æmˈbɪɡjuəs/", meaning: "模糊的", example: "The instructions were ambiguous.", exampleCn: "说明书的表述很模糊。" },
+            { word: "amend", phonetic: "/əˈmend/", meaning: "修改", example: "They agreed to amend the contract.", exampleCn: "他们同意修改合同。" },
+            { word: "analogy", phonetic: "/əˈnælədʒi/", meaning: "类比", example: "She used an analogy to explain the concept.", exampleCn: "她用类比来解释这个概念。" },
+            { word: "analyze", phonetic: "/ˈænəlaɪz/", meaning: "分析", example: "We need to analyze the data carefully.", exampleCn: "我们需要仔细分析数据。" },
+            { word: "annual", phonetic: "/ˈænjuəl/", meaning: "每年的", example: "The annual report shows growth.", exampleCn: "年度报告显示增长。" },
+            { word: "anticipate", phonetic: "/ænˈtɪsɪpeɪt/", meaning: "预期", example: "We anticipate strong demand for the product.", exampleCn: "我们预期该产品需求强劲。" },
+            { word: "apparent", phonetic: "/əˈpærənt/", meaning: "明显的", example: "It was apparent that she was upset.", exampleCn: "很明显她很沮丧。" },
+            { word: "appeal", phonetic: "/əˈpiːl/", meaning: "吸引；呼吁", example: "The product has wide appeal.", exampleCn: "该产品有广泛的吸引力。" },
+            { word: "appendix", phonetic: "/əˈpendɪks/", meaning: "附录", example: "See Appendix A for more details.", exampleCn: "详见附录A。" },
+            { word: "appreciate", phonetic: "/əˈpriːʃieɪt/", meaning: "欣赏；感激", example: "We appreciate your hard work.", exampleCn: "我们感激您的辛勤工作。" },
+            { word: "approach", phonetic: "/əˈproʊtʃ/", meaning: "接近；方法", example: "We need a new approach to solve this.", exampleCn: "我们需要一种新方法来解决这个问题。" },
+            { word: "appropriate", phonetic: "/əˈproʊpriət/", meaning: "适当的", example: "Please wear appropriate clothing.", exampleCn: "请穿适当的衣服。" },
+            { word: "approximate", phonetic: "/əˈprɑːksɪmət/", meaning: "大约的", example: "The approximate cost is $500.", exampleCn: "大约费用是500美元。" },
+            { word: "arbitrary", phonetic: "/ˈɑːrbɪtreri/", meaning: "任意的", example: "The decision seemed arbitrary.", exampleCn: "这个决定看起来很随意。" },
+            { word: "area", phonetic: "/ˈeriə/", meaning: "区域；领域", example: "This is a restricted area.", exampleCn: "这是禁区。" },
+            { word: "aspect", phonetic: "/ˈæspekt/", meaning: "方面", example: "We need to consider every aspect.", exampleCn: "我们需要考虑各个方面。" },
+            { word: "assemble", phonetic: "/əˈsembl/", meaning: "组装；集合", example: "They assembled the furniture themselves.", exampleCn: "他们自己组装了家具。" },
+            { word: "assess", phonetic: "/əˈses/", meaning: "评估", example: "We need to assess the situation.", exampleCn: "我们需要评估情况。" },
+            { word: "assign", phonetic: "/əˈsaɪn/", meaning: "分配；指派", example: "The manager assigned tasks to the team.", exampleCn: "经理给团队分配了任务。" },
+            { word: "assist", phonetic: "/əˈsɪst/", meaning: "协助", example: "Can you assist me with this task?", exampleCn: "您能帮我完成这个任务吗？" },
+            { word: "assume", phonetic: "/əˈsuːm/", meaning: "假设", example: "Let's assume this is the right solution.", exampleCn: "让我们假设这是正确的解决方案。" },
+            { word: "assure", phonetic: "/əˈʃʊr/", meaning: "确保；保证", example: "I can assure you of our support.", exampleCn: "我可以向您保证我们的支持。" },
+            { word: "attach", phonetic: "/əˈtætʃ/", meaning: "附加；附着", example: "Please attach the file to your email.", exampleCn: "请把文件附件到您的邮件中。" },
+            { word: "attain", phonetic: "/əˈteɪn/", meaning: "达到；获得", example: "She attained a high score on the test.", exampleCn: "她在测试中取得了高分。" },
+            { word: "attempt", phonetic: "/əˈtempt/", meaning: "尝试", example: "She attempted to climb the mountain.", exampleCn: "她尝试爬那座山。" },
+            { word: "attend", phonetic: "/əˈtend/", meaning: "参加；照顾", example: "I will attend the meeting tomorrow.", exampleCn: "我将参加明天的会议。" },
+            { word: "attract", phonetic: "/əˈtrækt/", meaning: "吸引", example: "The festival attracts thousands of visitors.", exampleCn: "这个节日吸引了数千名游客。" },
+            { word: "attribute", phonetic: "/ˈætrɪbjuːt/", meaning: "属性；归因", example: "His success is attributed to hard work.", exampleCn: "他的成功归因于努力工作。" },
+            { word: "authentic", phonetic: "/ɔːˈθentɪk/", meaning: "真实的", example: "This is an authentic French pastry.", exampleCn: "这是正宗的法式糕点。" },
+            { word: "author", phonetic: "/ˈɔːθər/", meaning: "作者", example: "The author wrote many bestsellers.", exampleCn: "这位作者写了很多畅销书。" },
+            { word: "authority", phonetic: "/əˈθɔːrəti/", meaning: "权威；当局", example: "She has the authority to make decisions.", exampleCn: "她有权做决定。" },
+            { word: "automate", phonetic: "/ˈɔːtəmeɪt/", meaning: "自动化", example: "We plan to automate the production process.", exampleCn: "我们计划将生产过程自动化。" },
+            { word: "available", phonetic: "/əˈveɪləbl/", meaning: "可用的", example: "Is this product available in stores?", exampleCn: "这个产品在商店有售吗？" },
+            { word: "average", phonetic: "/ˈævərɪdʒ/", meaning: "平均的", example: "The average temperature is 20 degrees.", exampleCn: "平均温度是20度。" },
+            { word: "avoid", phonetic: "/əˈvɔɪd/", meaning: "避免", example: "Try to avoid making mistakes.", exampleCn: "尽量避免犯错误。" },
+            { word: "aware", phonetic: "/əˈwer/", meaning: "意识到的", example: "Are you aware of the new policy?", exampleCn: "您知道新政策吗？" },
+            // B
+            { word: "background", phonetic: "/ˈbækɡraʊnd/", meaning: "背景", example: "She has a strong academic background.", exampleCn: "她有很强的学术背景。" },
+            { word: "balance", phonetic: "/ˈbæləns/", meaning: "平衡", example: "You need to balance work and life.", exampleCn: "你需要平衡工作和生活。" },
+            { word: "barrier", phonetic: "/ˈbæriər/", meaning: "障碍", example: "Language can be a barrier to communication.", exampleCn: "语言可能是沟通的障碍。" },
+            { word: "base", phonetic: "/beɪs/", meaning: "基础；基地", example: "The company has its base in Tokyo.", exampleCn: "公司的总部在东京。" },
+            { word: "basis", phonetic: "/ˈbeɪsɪs/", meaning: "基础；根据", example: "On what basis was the decision made?", exampleCn: "这个决定是根据什么做出的？" },
+            { word: "behavior", phonetic: "/bɪˈheɪvjər/", meaning: "行为", example: "Her behavior was quite professional.", exampleCn: "她的行为相当专业。" },
+            { word: "benefit", phonetic: "/ˈbenɪfɪt/", meaning: "利益；好处", example: "Exercise has many health benefits.", exampleCn: "运动有很多健康益处。" },
+            { word: "bias", phonetic: "/ˈbaɪəs/", meaning: "偏见", example: "The report shows no bias toward either side.", exampleCn: "报告显示对双方都没有偏见。" },
+            { word: "bind", phonetic: "/baɪnd/", meaning: "绑定；约束", example: "The contract binds both parties.", exampleCn: "合同约束双方。" },
+            { word: "blank", phonetic: "/blæŋk/", meaning: "空白的", example: "Please fill in the blank forms.", exampleCn: "请填写空白表格。" },
+            { word: "blast", phonetic: "/blæst/", meaning: "爆炸；冲击", example: "The blast caused significant damage.", exampleCn: "爆炸造成了重大损害。" },
+            { word: "blend", phonetic: "/blend/", meaning: "混合", example: "This coffee is a blend of different beans.", exampleCn: "这种咖啡是不同咖啡豆的混合。" },
+            { word: "board", phonetic: "/bɔːrd/", meaning: "董事会；木板", example: "The board approved the new strategy.", exampleCn: "董事会批准了新战略。" },
+            { word: "bonus", phonetic: "/ˈboʊnəs/", meaning: "奖金", example: "Employees received a year-end bonus.", exampleCn: "员工收到了年终奖金。" },
+            { word: "brief", phonetic: "/briːf/", meaning: "简短的；摘要", example: "Please give me a brief summary.", exampleCn: "请给我一个简短的总结。" },
+            { word: "broad", phonetic: "/brɔːd/", meaning: "广泛的", example: "She has a broad knowledge of the subject.", exampleCn: "她对这个主题有广泛的了解。" },
+            { word: "budget", phonetic: "/ˈbʌdʒɪt/", meaning: "预算", example: "We need to prepare a budget for the project.", exampleCn: "我们需要为项目准备预算。" },
+            { word: "burden", phonetic: "/ˈbɜːrdn/", meaning: "负担", example: "The tax burden is too heavy.", exampleCn: "税收负担太重。" },
+            { word: "bureaucracy", phonetic: "/bjʊˈrɒkrəsi/", meaning: "官僚体制", example: "The bureaucracy slowed down the process.", exampleCn: "官僚体制减缓了进程。" },
+            { word: "business", phonetic: "/ˈbɪznəs/", meaning: "商业；事务", example: "She runs her own business.", exampleCn: "她经营自己的企业。" },
+            // C
+            { word: "calculate", phonetic: "/ˈkælkjuleɪt/", meaning: "计算", example: "We need to calculate the costs.", exampleCn: "我们需要计算成本。" },
+            { word: "candidate", phonetic: "/ˈkændɪdeɪt/", meaning: "候选人", example: "There are many candidates for the job.", exampleCn: "这个职位有很多候选人。" },
+            { word: "capacity", phonetic: "/kəˈpæsəti/", meaning: "容量；能力", example: "The stadium has a capacity of 50,000.", exampleCn: "体育场可容纳5万人。" },
+            { word: "capital", phonetic: "/ˈkæpɪtl/", meaning: "资本；首都", example: "We need more capital to expand.", exampleCn: "我们需要更多资本来扩张。" },
+            { word: "capture", phonetic: "/ˈkæptʃər/", meaning: "捕获；记录", example: "The photo captures the moment perfectly.", exampleCn: "这张照片完美地捕捉了那一刻。" },
+            { word: "career", phonetic: "/kəˈrɪr/", meaning: "职业", example: "She has a successful career in finance.", exampleCn: "她在金融领域有成功的职业生涯。" },
+            { word: "case", phonetic: "/keɪs/", meaning: "情况；案例", example: "In this case, we need to act quickly.", exampleCn: "在这种情况下，我们需要快速行动。" },
+            { word: "cash", phonetic: "/kæʃ/", meaning: "现金", example: "Do you have any cash on you?", exampleCn: "你身上有现金吗？" },
+            { word: "category", phonetic: "/ˈkætəɡɔːri/", meaning: "类别", example: "This product falls into a new category.", exampleCn: "这个产品属于一个新类别。" },
+            { word: "cease", phonetic: "/siːs/", meaning: "停止", example: "The company ceased operations last year.", exampleCn: "该公司去年停止了运营。" },
+            { word: "center", phonetic: "/ˈsentər/", meaning: "中心", example: "The city center is very busy.", exampleCn: "市中心非常繁忙。" },
+            { word: "central", phonetic: "/ˈsentrəl/", meaning: "中心的", example: "This is a central issue for the project.", exampleCn: "这是项目的核心问题。" },
+            { word: "century", phonetic: "/ˈsentʃəri/", meaning: "世纪", example: "The company was founded in the 20th century.", exampleCn: "这家公司成立于20世纪。" },
+            { word: "certain", phonetic: "/ˈsɜːrtn/", meaning: "确定的；某个", example: "I'm certain about my decision.", exampleCn: "我对自己的决定很有把握。" },
+            { word: "certificate", phonetic: "/sərˈtɪfɪkət/", meaning: "证书", example: "She received a completion certificate.", exampleCn: "她收到了结业证书。" },
+            { word: "challenge", phonetic: "/ˈtʃælɪndʒ/", meaning: "挑战", example: "This is a big challenge for us.", exampleCn: "这对我们来说是一个巨大的挑战。" },
+            { word: "chamber", phonetic: "/ˈtʃeɪmbər/", meaning: "房间；会议厅", example: "The meeting will be held in the council chamber.", exampleCn: "会议将在会议室举行。" },
+            { word: "channel", phonetic: "/ˈtʃænl/", meaning: "频道；渠道", example: "Please contact us through the official channel.", exampleCn: "请通过官方渠道联系我们。" },
+            { word: "chapter", phonetic: "/ˈtʃæptər/", meaning: "章节", example: "Chapter 3 discusses the research methods.", exampleCn: "第三章讨论研究方法。" },
+            { word: "charge", phonetic: "/tʃɑːrdʒ/", meaning: "收费；指控", example: "How much do you charge for this service?", exampleCn: "这项服务收费多少？" },
+            { word: "chief", phonetic: "/tʃiːf/", meaning: "主要的；首领", example: "The chief executive officer attended the meeting.", exampleCn: "首席执行官参加了会议。" },
+            { word: "circumstance", phonetic: "/ˈsɜːrkəmstəns/", meaning: "情况", example: "Under the circumstances, we had no choice.", exampleCn: "在这种情况下，我们别无选择。" },
+            { word: "cite", phonetic: "/saɪt/", meaning: "引用", example: "Please cite your sources properly.", exampleCn: "请正确引用您的来源。" },
+            { word: "claim", phonetic: "/kleɪm/", meaning: "声称；索赔", example: "The company claims the product is safe.", exampleCn: "该公司声称该产品是安全的。" },
+            { word: "clarify", phonetic: "/ˈklærəfaɪ/", meaning: "澄清", example: "Could you clarify your statement?", exampleCn: "您能澄清一下您的声明吗？" },
+            { word: "classic", phonetic: "/ˈklæsɪk/", meaning: "经典的", example: "This is a classic case of poor management.", exampleCn: "这是一个管理不善的典型案例。" },
+            { word: "clear", phonetic: "/klɪr/", meaning: "清晰的", example: "The instructions are very clear.", exampleCn: "说明非常清楚。" },
+            { word: "client", phonetic: "/ˈklaɪənt/", meaning: "客户", example: "We need to meet the client's requirements.", exampleCn: "我们需要满足客户的要求。" },
+            { word: "clue", phonetic: "/kluː/", meaning: "线索", example: "The police found an important clue.", exampleCn: "警察发现了一个重要的线索。" },
+            { word: "coach", phonetic: "/koʊtʃ/", meaning: "教练", example: "The coach trained the team for the competition.", exampleCn: "教练为比赛训练队伍。" },
+            { word: "collapse", phonetic: "/kəˈlæps/", meaning: "倒塌；崩溃", example: "The building collapsed during the earthquake.", exampleCn: "大楼在地震中倒塌了。" },
+            { word: "colleague", phonetic: "/ˈkɒliːɡ/", meaning: "同事", example: "I discussed the issue with my colleague.", exampleCn: "我和同事讨论了这个问题。" },
+            { word: "column", phonetic: "/ˈkɒləm/", meaning: "专栏；柱子", example: "She writes a weekly column for the newspaper.", exampleCn: "她为报纸每周写专栏。" },
+            { word: "combat", phonetic: "/ˈkɒmbæt/", meaning: "战斗；对抗", example: "The government is taking measures to combat crime.", exampleCn: "政府正在采取措施打击犯罪。" },
+            { word: "combine", phonetic: "/kəmˈbaɪn/", meaning: "结合", example: "We need to combine theory with practice.", exampleCn: "我们需要将理论与实践相结合。" },
+            { word: "command", phonetic: "/kəˈmænd/", meaning: "命令；掌握", example: "She has a good command of English.", exampleCn: "她精通英语。" },
+            { word: "comment", phonetic: "/ˈkɒment/", meaning: "评论", example: "Do you have any comments on this proposal?", exampleCn: "您对这个建议有什么评论？" },
+            { word: "commercial", phonetic: "/kəˈmɜːrʃl/", meaning: "商业的", example: "This is a commercial center of the city.", exampleCn: "这是城市的商业中心。" },
+            { word: "commission", phonetic: "/kəˈmɪʃn/", meaning: "委员会；佣金", example: "She receives a 10% commission on each sale.", exampleCn: "她每笔销售获得10%的佣金。" },
+            { word: "commit", phonetic: "/kəˈmɪt/", meaning: "承诺；犯罪", example: "We must commit to our goals.", exampleCn: "我们必须致力于实现我们的目标。" },
+            { word: "commitment", phonetic: "/kəˈmɪtmənt/", meaning: "承诺；奉献", example: "She made a commitment to finish the project.", exampleCn: "她承诺完成这个项目。" },
+            { word: "committee", phonetic: "/kəˈmɪti/", meaning: "委员会", example: "The committee will meet next week.", exampleCn: "委员会将于下周开会。" },
+            { word: "commodity", phonetic: "/kəˈmɒdəti/", meaning: "商品", example: "Oil is an important commodity.", exampleCn: "石油是一种重要的商品。" },
+            { word: "common", phonetic: "/ˈkɒmən/", meaning: "共同的；常见的", example: "This is a common problem in our industry.", exampleCn: "这是我们行业的一个常见问题。" },
+            { word: "communicate", phonetic: "/kəˈmjuːnɪkeɪt/", meaning: "沟通", example: "We need to communicate more effectively.", exampleCn: "我们需要更有效地沟通。" },
+            { word: "community", phonetic: "/kəˈmjuːnəti/", meaning: "社区", example: "The local community is very supportive.", exampleCn: "当地社区非常支持。" },
+            { word: "compact", phonetic: "/kəmˈpækt/", meaning: "紧凑的", example: "The apartment has a compact design.", exampleCn: "这套公寓设计紧凑。" },
+            { word: "company", phonetic: "/ˈkʌmpəni/", meaning: "公司", example: "She works for a large company.", exampleCn: "她在一家大公司工作。" },
+            { word: "compare", phonetic: "/kəmˈper/", meaning: "比较", example: "Let's compare the two options.", exampleCn: "让我们比较这两个选项。" },
+            { word: "compel", phonetic: "/kəmˈpel/", meaning: "强迫", example: "The law compels companies to pay taxes.", exampleCn: "法律强迫公司纳税。" },
+            { word: "compete", phonetic: "/kəmˈpiːt/", meaning: "竞争", example: "Many companies compete for this market.", exampleCn: "许多公司竞争这个市场。" },
+            { word: "competent", phonetic: "/ˈkɒmpɪtənt/", meaning: "胜任的", example: "She is highly competent in her field.", exampleCn: "她在自己的领域非常胜任。" },
+            { word: "competitive", phonetic: "/kəmˈpetətɪv/", meaning: "竞争的", example: "The market is very competitive.", exampleCn: "市场竞争非常激烈。" },
+            { word: "complain", phonetic: "/kəmˈpleɪn/", meaning: "抱怨", example: "Customers complained about the service.", exampleCn: "顾客抱怨服务不好。" },
+            { word: "complete", phonetic: "/kəmˈpliːt/", meaning: "完成；完全的", example: "Please complete the form before submitting.", exampleCn: "请在提交前填写完表格。" },
+            { word: "complex", phonetic: "/ˈkɒmpleks/", meaning: "复杂的", example: "This is a complex problem that requires careful analysis.", exampleCn: "这是一个需要仔细分析的复杂问题。" },
+            { word: "complicate", phonetic: "/ˈkɒmplɪkeɪt/", meaning: "使复杂化", example: "Don't complicate the simple matter.", exampleCn: "不要把简单的事情复杂化。" },
+            { word: "component", phonetic: "/kəmˈpoʊnənt/", meaning: "组件；成分", example: "This is an essential component of the system.", exampleCn: "这是系统的重要组成部分。" },
+            { word: "compose", phonetic: "/kəmˈpoʊz/", meaning: "组成；作曲", example: "The committee is composed of experts.", exampleCn: "委员会由专家组成。" },
+            { word: "comprehensive", phonetic: "/ˌkɒmprɪˈhensɪv/", meaning: "全面的", example: "We need a comprehensive review of the situation.", exampleCn: "我们需要对情况进行全面审查。" },
+            { word: "comprise", phonetic: "/kəmˈpraɪz/", meaning: "包含；组成", example: "The team comprises five members.", exampleCn: "团队由五名成员组成。" },
+            { word: "compromise", phonetic: "/ˈkɒmpromaɪz/", meaning: "妥协", example: "Both sides need to make compromises.", exampleCn: "双方都需要做出妥协。" },
+            { word: "conceive", phonetic: "/kənˈsiːv/", meaning: "设想；怀孕", example: "She conceived a new idea for the project.", exampleCn: "她为这个项目想出了一个新主意。" },
+            { word: "concentrate", phonetic: "/ˈkɒnsntreɪt/", meaning: "集中", example: "You need to concentrate on your work.", exampleCn: "你需要专注于工作。" },
+            { word: "concept", phonetic: "/ˈkɒnsept/", meaning: "概念", example: "This is a new concept in education.", exampleCn: "这是教育方面的新概念。" },
+            { word: "concern", phonetic: "/kənˈsɜːrn/", meaning: "关心；担心", example: "We have concerns about the new policy.", exampleCn: "我们对新政策感到担忧。" },
+            { word: "concession", phonetic: "/kənˈseʃn/", meaning: "让步；特许", example: "The company made some concessions to workers.", exampleCn: "公司对工人做出了一些让步。" },
+            { word: "conclude", phonetic: "/kənˈkluːd/", meaning: "结束；得出结论", example: "We concluded the meeting at 5 PM.", exampleCn: "我们在下午5点结束了会议。" },
+            { word: "conclusion", phonetic: "/kənˈkluːʒn/", meaning: "结论", example: "What is your conclusion from this study?", exampleCn: "你从这项研究中得出什么结论？" },
+            { word: "concrete", phonetic: "/ˈkɒnkriːt/", meaning: "具体的；混凝土", example: "We need concrete evidence to support the claim.", exampleCn: "我们需要具体的证据来支持这一说法。" },
+            { word: "conduct", phonetic: "/ˈkɒndʌkt/", meaning: "实施；行为", example: "The company will conduct a survey next month.", exampleCn: "该公司将在下个月进行调查。" },
+            { word: "confer", phonetic: "/kənˈfɜːr/", meaning: "授予；协商", example: "The degree was conferred on her at the ceremony.", exampleCn: "学位在典礼上授予了她。" },
+            { word: "conference", phonetic: "/ˈkɒnfərəns/", meaning: "会议", example: "The conference will be held next week.", exampleCn: "会议将于下周举行。" },
+            { word: "confirm", phonetic: "/kənˈfɜːrm/", meaning: "确认", example: "Please confirm your attendance by email.", exampleCn: "请通过电子邮件确认您的出席。" },
+            { word: "conflict", phonetic: "/ˈkɒnflɪkt/", meaning: "冲突", example: "There is a conflict between the two parties.", exampleCn: "双方之间存在冲突。" },
+            { word: "confuse", phonetic: "/kənˈfjuːz/", meaning: "使困惑", example: "Her explanation confused everyone.", exampleCn: "她的解释让大家都感到困惑。" },
+            { word: "congress", phonetic: "/ˈkɒŋɡres/", meaning: "国会；大会", example: "The congress will vote on the bill tomorrow.", exampleCn: "国会明天将对该法案进行投票。" },
+            { word: "connect", phonetic: "/kəˈnekt/", meaning: "连接", example: "Please connect the printer to the computer.", exampleCn: "请将打印机连接到电脑。" },
+            { word: "consecutive", phonetic: "/kənˈsekjətɪv/", meaning: "连续的", example: "She worked for five consecutive days.", exampleCn: "她连续工作了五天。" },
+            { word: "consent", phonetic: "/kənˈsent/", meaning: "同意", example: "You need parental consent to participate.", exampleCn: "您需要父母同意才能参加。" },
+            { word: "consequence", phonetic: "/ˈkɒnsɪkwəns/", meaning: "后果", example: "There will be serious consequences.", exampleCn: "将会产生严重的后果。" },
+            { word: "conservative", phonetic: "/kənˈsɜːrvətɪv/", meaning: "保守的", example: "The conservative estimate is $10 million.", exampleCn: "保守估计是1000万美元。" },
+            { word: "considerate", phonetic: "/kənˈsɪdərət/", meaning: "体贴的", example: "She is very considerate of others.", exampleCn: "她很体贴别人。" },
+            { word: "consist", phonetic: "/kənˈsɪst/", meaning: "由...组成", example: "The team consists of 10 members.", exampleCn: "团队由10名成员组成。" },
+            { word: "consistent", phonetic: "/kənˈsɪstənt/", meaning: "一致的", example: "We need consistent results across all departments.", exampleCn: "我们需要所有部门的结果一致。" },
+            { word: "consolidate", phonetic: "/kənˈsɒlɪdeɪt/", meaning: "巩固；合并", example: "We decided to consolidate our operations.", exampleCn: "我们决定整合业务。" },
+            { word: "conspicuous", phonetic: "/kənˈspɪkjuəs/", meaning: "引人注目的", example: "The mistake was very conspicuous.", exampleCn: "这个错误非常显眼。" },
+            { word: "constitute", phonetic: "/ˈkɒnstɪtjuːt/", meaning: "构成", example: "These factors constitute a serious problem.", exampleCn: "这些因素构成了一个严重的问题。" },
+            { word: "construct", phonetic: "/kənˈstrʌkt/", meaning: "建造", example: "They plan to construct a new building.", exampleCn: "他们计划建造一座新大楼。" },
+            { word: "consult", phonetic: "/kənˈsʌlt/", meaning: "咨询", example: "We need to consult with the experts.", exampleCn: "我们需要咨询专家。" },
+            { word: "consultant", phonetic: "/kənˈsʌltənt/", meaning: "顾问", example: "She works as a management consultant.", exampleCn: "她担任管理顾问。" },
+            { word: "consume", phonetic: "/kənˈsuːm/", meaning: "消耗；消费", example: "This car consumes less fuel.", exampleCn: "这辆车耗油较少。" },
+            { word: "contact", phonetic: "/ˈkɒntækt/", meaning: "联系", example: "Please contact me if you have any questions.", exampleCn: "如果您有任何问题，请联系我。" },
+            { word: "contain", phonetic: "/kənˈteɪn/", meaning: "包含", example: "The report contains important information.", exampleCn: "报告包含重要信息。" },
+            { word: "contemplate", phonetic: "/ˈkɒntempleɪt/", meaning: "沉思；考虑", example: "She contemplated her future carefully.", exampleCn: "她仔细思考了自己的未来。" },
+            { word: "content", phonetic: "/ˈkɒntent/", meaning: "内容；满足的", example: "Are you content with your current job?", exampleCn: "你对现在的工作满意吗？" },
+            { word: "contest", phonetic: "/ˈkɒntest/", meaning: "竞赛", example: "She entered the singing contest.", exampleCn: "她参加了歌唱比赛。" },
+            { word: "context", phonetic: "/ˈkɒntekst/", meaning: "上下文；背景", example: "You need to understand the context.", exampleCn: "你需要了解背景情况。" },
+            { word: "continue", phonetic: "/kənˈtɪnjuː/", meaning: "继续", example: "Please continue with your work.", exampleCn: "请继续您的工作。" },
+            { word: "contract", phonetic: "/ˈkɒntrækt/", meaning: "合同", example: "We need to sign the contract today.", exampleCn: "我们今天需要签合同。" },
+            { word: "contradict", phonetic: "/ˌkɒntrəˈdɪkt/", meaning: "矛盾；反驳", example: "The evidence contradicts his statement.", exampleCn: "证据与他的陈述相矛盾。" },
+            { word: "contrary", phonetic: "/ˈkɒntreri/", meaning: "相反的", example: "On the contrary, I think it's a good idea.", exampleCn: "相反，我认为这是个好主意。" },
+            { word: "contribute", phonetic: "/kənˈtrɪbjuːt/", meaning: "贡献", example: "Everyone should contribute to the project.", exampleCn: "每个人都应该为这个项目做贡献。" },
+            { word: "contribution", phonetic: "/ˌkɒntrɪˈbjuːʃn/", meaning: "贡献", example: "Her contribution was highly appreciated.", exampleCn: "她的贡献受到高度赞赏。" },
+            { word: "control", phonetic: "/kənˈtroʊl/", meaning: "控制", example: "We need to control the costs.", exampleCn: "我们需要控制成本。" },
+            { word: "controversial", phonetic: "/ˌkɒntrəˈvɜːrʃl/", meaning: "有争议的", example: "This is a controversial topic.", exampleCn: "这是一个有争议的话题。" },
+            { word: "convenience", phonetic: "/kənˈviːniəns/", meaning: "便利", example: "We offer home delivery for your convenience.", exampleCn: "为了您的方便，我们提供送货上门服务。" },
+            { word: "convenient", phonetic: "/kənˈviːniənt/", meaning: "方便的", example: "Is this time convenient for you?", exampleCn: "这个时间您方便吗？" },
+            { word: "convention", phonetic: "/kənˈvenʃn/", meaning: "惯例；会议", example: "It's a social convention to dress formally.", exampleCn: "正式着装是社交惯例。" },
+            { word: "conventional", phonetic: "/kənˈvenʃənl/", meaning: "传统的", example: "This is a conventional way of doing business.", exampleCn: "这是传统的商业方式。" },
+            { word: "conversation", phonetic: "/ˌkɒnvərˈseɪʃn/", meaning: "对话", example: "We had a conversation about the project.", exampleCn: "我们谈了这个项目。" },
+            { word: "conversely", phonetic: "/ˈkɒnvɜːrsli/", meaning: "相反地", example: "Conversely, increased costs reduce profits.", exampleCn: "相反，增加成本会减少利润。" },
+            { word: "convert", phonetic: "/kənˈvɜːrt/", meaning: "转换", example: "We need to convert the file to PDF.", exampleCn: "我们需要把文件转换成PDF格式。" },
+            { word: "convey", phonetic: "/kənˈveɪ/", meaning: "传达", example: "Please convey my regards to your family.", exampleCn: "请代我向您的家人问好。" },
+            { word: "convince", phonetic: "/kənˈvɪns/", meaning: "说服", example: "I couldn't convince him to stay.", exampleCn: "我无法说服他留下来。" },
+            { word: "cooperate", phonetic: "/koʊˈɒpəreɪt/", meaning: "合作", example: "We need to cooperate to solve this problem.", exampleCn: "我们需要合作解决这个问题。" },
+            { word: "coordinate", phonetic: "/koʊˈɔːrdɪneɪt/", meaning: "协调", example: "We need to coordinate our efforts.", exampleCn: "我们需要协调我们的工作。" },
+            { word: "cope", phonetic: "/koʊp/", meaning: "应对", example: "How do you cope with stress?", exampleCn: "你是如何应对压力的？" },
+            { word: "core", phonetic: "/kɔːr/", meaning: "核心", example: "This is the core business of the company.", exampleCn: "这是公司的核心业务。" },
+            { word: "corporate", phonetic: "/ˈkɔːrpərət/", meaning: "公司的", example: "The corporate culture is very positive.", exampleCn: "公司文化非常积极。" },
+            { word: "corporation", phonetic: "/ˌkɔːrpəˈreɪʃn/", meaning: "公司", example: "She works for a large corporation.", exampleCn: "她在大公司工作。" },
+            { word: "correct", phonetic: "/kəˈrekt/", meaning: "正确的", example: "Please correct the errors in the document.", exampleCn: "请纠正文档中的错误。" },
+            { word: "correspond", phonetic: "/ˌkɒrəˈspɒnd/", meaning: "对应；通信", example: "His job corresponds to her position.", exampleCn: "他的工作相当于她的职位。" },
+            { word: "corridor", phonetic: "/ˈkɒrɪdɔːr/", meaning: "走廊", example: "The corridor leads to the meeting room.", exampleCn: "走廊通向会议室。" },
+            { word: "costly", phonetic: "/ˈkɒstli/", meaning: "昂贵的", example: "This is a costly mistake.", exampleCn: "这是一个代价高昂的错误。" },
+            { word: "council", phonetic: "/ˈkaʊnsl/", meaning: "委员会；议会", example: "The city council voted on the proposal.", exampleCn: "市议会对该提案进行了投票。" },
+            { word: "counter", phonetic: "/ˈkaʊntər/", meaning: "柜台；计数器", example: "Please pay at the counter.", exampleCn: "请在柜台付款。" },
+            { word: "counterpart", phonetic: "/ˈkaʊntərpɑːrt/", meaning: "对应的人或物", example: "I spoke with my counterpart in the US office.", exampleCn: "我与美国办事处的对应人员交谈了。" },
+            { word: "county", phonetic: "/ˈkaʊnti/", meaning: "县；郡", example: "The county has a population of 50,000.", exampleCn: "这个县有5万人口。" },
+            { word: "cover", phonetic: "/ˈkʌvər/", meaning: "覆盖；覆盖物", example: "The insurance covers all damages.", exampleCn: "保险覆盖所有损害。" },
+            { word: "crash", phonetic: "/kræʃ/", meaning: "碰撞；崩溃", example: "The stock market crashed yesterday.", exampleCn: "股市昨天崩盘了。" },
+            { word: "create", phonetic: "/kriˈeɪt/", meaning: "创造", example: "We need to create a new marketing strategy.", exampleCn: "我们需要制定新的营销策略。" },
+            { word: "credit", phonetic: "/ˈkredɪt/", meaning: "信用；学分", example: "You will receive credit for this course.", exampleCn: "你将获得这门课程的学分。" },
+            { word: "crisis", phonetic: "/ˈkraɪsɪs/", meaning: "危机", example: "The company is facing a financial crisis.", exampleCn: "公司面临财务危机。" },
+            { word: "critic", phonetic: "/ˈkrɪtɪk/", meaning: "批评家", example: "The movie received mix reviews from critics.", exampleCn: "这部电影受到评论家褒贬不一的评价。" },
+            { word: "critical", phonetic: "/ˈkrɪtɪkl/", meaning: "关键的；批评的", example: "This is a critical moment for the project.", exampleCn: "这是项目的关键时刻。" },
+            { word: "criticism", phonetic: "/ˈkrɪtɪsɪzəm/", meaning: "批评", example: "She faced criticism for her decision.", exampleCn: "她的决定受到了批评。" },
+            { word: "criticize", phonetic: "/ˈkrɪtɪsaɪz/", meaning: "批评", example: "Don't criticize others without good reason.", exampleCn: "不要没有充分理由地批评别人。" },
+            { word: "crucial", phonetic: "/ˈkruːʃl/", meaning: "关键的", example: "Time is crucial in this situation.", exampleCn: "在这种情况下时间至关重要。" },
+            { word: "curious", phonetic: "/ˈkjʊəriəs/", meaning: "好奇的", example: "I'm curious about the results.", exampleCn: "我对结果很好奇。" },
+            { word: "current", phonetic: "/ˈkʌrənt/", meaning: "当前的；流", example: "The current situation is very challenging.", exampleCn: "目前的情况非常具有挑战性。" },
+            { word: "curve", phonetic: "/kɜːrv/", meaning: "曲线", example: "The sales curve shows an upward trend.", exampleCn: "销售曲线显示上升趋势。" },
+            { word: "cycle", phonetic: "/ˈsaɪkl/", meaning: "循环；周期", example: "The business cycle has four phases.", exampleCn: "商业周期有四个阶段。" }
+        ];
+
+        // App State
+        let state = {
+            learnedWords: [],
+            currentIndex: 0,
+            dailyWords: [],
+            practiceIndex: 0,
+            testMode: 'choice',
+            testQuestions: [],
+            currentQuestion: 0,
+            correctAnswers: 0,
+            speechRate: 1,
+            isRecording: false,
+            mediaRecorder: null,
+            audioChunks: [],
+            recordedAudio: null
+        };
+
+        // Load state from localStorage
+        function loadState() {
+            const saved = localStorage.getItem('toeic-vocab-state');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                state.learnedWords = parsed.learnedWords || [];
+                state.dailyWords = parsed.dailyWords || [];
+                state.practiceIndex = parsed.practiceIndex || 0;
+
+                const lastDate = parsed.lastDate;
+                const today = new Date().toDateString();
+                if (lastDate !== today) {
+                    state.dailyWords = [];
+                    state.currentIndex = 0;
+                }
+            }
+            updateHeaderStats();
+        }
+
+        // Save state to localStorage
+        function saveState() {
+            localStorage.setItem('toeic-vocab-state', JSON.stringify({
+                learnedWords: state.learnedWords,
+                dailyWords: state.dailyWords,
+                practiceIndex: state.practiceIndex,
+                lastDate: new Date().toDateString()
+            }));
+            updateHeaderStats();
+        }
+
+        function updateHeaderStats() {
+            document.getElementById('total-words').textContent = VOCABULARY.length;
+            document.getElementById('learned-count').textContent = state.learnedWords.length;
+        }
+
+        // Get today's words
+        function getDailyWords() {
+            if (state.dailyWords.length > 0) {
+                return state.dailyWords;
+            }
+
+            const remaining = VOCABULARY.filter(w => !state.learnedWords.includes(w.word));
+            const shuffled = [...remaining].sort(() => Math.random() - 0.5);
+            state.dailyWords = shuffled.slice(0, 10);
+            saveState();
+            return state.dailyWords;
+        }
+
+        // Page switching
+        function switchPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            document.getElementById(page + '-page').classList.add('active');
+            document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active');
+
+            if (page === 'learn') {
+                updateLearnPage();
+            } else if (page === 'practice') {
+                updatePracticePage();
+            } else if (page === 'test') {
+                updateTestStart();
+            }
+        }
+
+        // Learn page
+        function updateLearnPage() {
+            const words = getDailyWords();
+            const learnedToday = state.dailyWords.slice(0, state.currentIndex);
+
+            document.getElementById('learn-progress').textContent = learnedToday.length;
+            document.getElementById('progress-fill').style.width = (learnedToday.length / 10 * 100) + '%';
+
+            if (words.length === 0 || state.currentIndex >= words.length) {
+                document.getElementById('word-container').style.display = 'none';
+                document.getElementById('completed-msg').style.display = 'block';
+                document.getElementById('mastered-count').textContent = state.learnedWords.length;
+                document.getElementById('total-learned').textContent = state.learnedWords.length;
+                document.getElementById('remaining-words').textContent = VOCABULARY.length - state.learnedWords.length;
+            } else {
+                document.getElementById('word-container').style.display = 'block';
+                document.getElementById('completed-msg').style.display = 'none';
+
+                const word = words[state.currentIndex];
+                document.getElementById('word-text').textContent = word.word;
+                document.getElementById('phonetic').textContent = word.phonetic;
+                document.getElementById('meaning').textContent = word.meaning;
+                document.getElementById('example').textContent = word.example;
+                document.getElementById('example-cn').textContent = word.exampleCn;
+
+                document.getElementById('meaning').style.display = 'none';
+                document.getElementById('example').style.display = 'none';
+                document.getElementById('example-cn').style.display = 'none';
+                document.getElementById('word-card').classList.remove('flipped');
+            }
+        }
+
+        function flipCard() {
+            const meaning = document.getElementById('meaning');
+            const example = document.getElementById('example');
+            const exampleCn = document.getElementById('example-cn');
+            const card = document.getElementById('word-card');
+
+            if (meaning.style.display === 'none') {
+                meaning.style.display = 'block';
+                example.style.display = 'block';
+                exampleCn.style.display = 'block';
+                card.classList.add('flipped');
+            } else {
+                meaning.style.display = 'none';
+                example.style.display = 'none';
+                exampleCn.style.display = 'none';
+                card.classList.remove('flipped');
+            }
+        }
+
+        function markKnow() {
+            const words = getDailyWords();
+            if (state.currentIndex < words.length) {
+                const word = words[state.currentIndex];
+                if (!state.learnedWords.includes(word.word)) {
+                    state.learnedWords.push(word.word);
+                }
+                state.currentIndex++;
+                saveState();
+                updateLearnPage();
+            }
+        }
+
+        function markDontKnow() {
+            const words = getDailyWords();
+            if (state.currentIndex < words.length) {
+                state.currentIndex++;
+                if (state.currentIndex >= words.length) {
+                    state.currentIndex = 0;
+                }
+                saveState();
+                updateLearnPage();
+            }
+        }
+
+        function startOver() {
+            state.learnedWords = [];
+            state.dailyWords = [];
+            state.currentIndex = 0;
+            saveState();
+            updateLearnPage();
+        }
+
+        // Practice page
+        function updatePracticePage() {
+            const words = state.learnedWords.length > 0
+                ? VOCABULARY.filter(w => state.learnedWords.includes(w.word))
+                : VOCABULARY;
+
+            if (words.length === 0) {
+                state.currentPracticeWord = VOCABULARY[Math.floor(Math.random() * VOCABULARY.length)];
+            } else {
+                state.currentPracticeWord = words[state.practiceIndex % words.length];
+            }
+
+            document.getElementById('practice-word').textContent = state.currentPracticeWord.word;
+            document.getElementById('practice-phonetic').textContent = state.currentPracticeWord.phonetic;
+        }
+
+        function speakWord() {
+            const btn = document.getElementById('speak-btn');
+            btn.classList.add('playing');
+
+            const utterance = new SpeechSynthesisUtterance(state.currentPracticeWord.word);
+            utterance.lang = 'en-US';
+            utterance.rate = state.speechRate;
+
+            utterance.onend = () => btn.classList.remove('playing');
+            speechSynthesis.speak(utterance);
+        }
+
+        function setSpeed(speed) {
+            state.speechRate = speed;
+            document.querySelectorAll('.speed-btn').forEach(btn => {
+                btn.classList.toggle('active', parseFloat(btn.dataset.speed) === speed);
+            });
+        }
+
+        function nextPracticeWord() {
+            state.practiceIndex++;
+            saveState();
+            updatePracticePage();
+        }
+
+        // Recording functionality
+        async function toggleRecording() {
+            const btn = document.getElementById('record-btn');
+
+            if (!state.isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    state.mediaRecorder = new MediaRecorder(stream);
+                    state.audioChunks = [];
+
+                    state.mediaRecorder.ondataavailable = (e) => {
+                        state.audioChunks.push(e.data);
+                    };
+
+                    state.mediaRecorder.onstop = () => {
+                        const blob = new Blob(state.audioChunks, { type: 'audio/wav' });
+                        state.recordedAudio = URL.createObjectURL(blob);
+                        document.getElementById('playback-btn').style.display = 'block';
+                    };
+
+                    state.mediaRecorder.start();
+                    state.isRecording = true;
+                    btn.classList.add('recording');
+                    btn.innerHTML = '⏹';
+                } catch (err) {
+                    alert('无法访问麦克风，请确保已授予权限');
+                }
+            } else {
+                state.mediaRecorder.stop();
+                state.isRecording = false;
+                btn.classList.remove('recording');
+                btn.innerHTML = '🎤';
+            }
+        }
+
+        function playRecording() {
+            if (state.recordedAudio) {
+                const audio = new Audio(state.recordedAudio);
+                audio.play();
+            }
+        }
+
+        // Test page
+        function selectTestMode(mode) {
+            state.testMode = mode;
+            document.querySelectorAll('.test-mode-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.mode === mode);
+            });
+        }
+
+        function startTest() {
+            const words = state.learnedWords.length > 0
+                ? VOCABULARY.filter(w => state.learnedWords.includes(w.word))
+                : VOCABULARY;
+
+            if (words.length < 4) {
+                alert('请先学习更多单词，至少需要4个单词才能开始测试');
+                return;
+            }
+
+            state.testQuestions = [];
+            for (let i = 0; i < 10; i++) {
+                const correctWord = words[Math.floor(Math.random() * words.length)];
+                const wrongOptions = VOCABULARY
+                    .filter(w => w.word !== correctWord.word)
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 3)
+                    .map(w => w.word);
+
+                state.testQuestions.push({
+                    correct: correctWord,
+                    options: [correctWord.word, ...wrongOptions].sort(() => Math.random() - 0.5)
+                });
+            }
+
+            state.currentQuestion = 0;
+            state.correctAnswers = 0;
+
+            document.getElementById('test-start').style.display = 'none';
+            document.getElementById('test-content').style.display = 'block';
+            document.getElementById('test-result').style.display = 'none';
+
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = state.testQuestions[state.currentQuestion];
+            document.getElementById('question-num').textContent = state.currentQuestion + 1;
+            document.getElementById('test-progress').textContent = (state.currentQuestion + 1) + '/10';
+
+            if (state.testMode === 'choice') {
+                document.getElementById('question-text').textContent = question.correct.meaning;
+                document.getElementById('question-audio').style.display = 'none';
+                document.getElementById('dictation-input-area').style.display = 'none';
+                document.getElementById('options-container').style.display = 'grid';
+
+                const optionsHtml = question.options.map(opt =>
+                    `<button class="option-btn" onclick="selectOption('${opt}')">${opt}</button>`
+                ).join('');
+                document.getElementById('options-container').innerHTML = optionsHtml;
+            } else {
+                document.getElementById('question-text').textContent = '听写单词';
+                document.getElementById('question-audio').style.display = 'flex';
+                document.getElementById('dictation-input-area').style.display = 'block';
+                document.getElementById('options-container').style.display = 'none';
+                document.getElementById('answer-input').value = '';
+                document.getElementById('answer-input').classList.remove('correct', 'incorrect');
+                document.getElementById('answer-input').focus();
+            }
+        }
+
+        function playQuestionAudio() {
+            const utterance = new SpeechSynthesisUtterance(state.testQuestions[state.currentQuestion].correct.word);
+            utterance.lang = 'en-US';
+            speechSynthesis.speak(utterance);
+        }
+
+        function selectOption(word) {
+            const question = state.testQuestions[state.currentQuestion];
+            const buttons = document.querySelectorAll('.option-btn');
+
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent === question.correct.word) {
+                    btn.classList.add('correct');
+                } else if (btn.textContent === word && word !== question.correct.word) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            if (word === question.correct.word) {
+                state.correctAnswers++;
+            }
+
+            setTimeout(() => {
+                nextQuestion();
+            }, 1000);
+        }
+
+        function submitDictation() {
+            const answer = document.getElementById('answer-input').value.trim().toLowerCase();
+            const question = state.testQuestions[state.currentQuestion];
+            const input = document.getElementById('answer-input');
+
+            if (answer === question.correct.word.toLowerCase()) {
+                state.correctAnswers++;
+                input.classList.add('correct');
+                input.classList.remove('incorrect');
+            } else {
+                input.classList.add('incorrect');
+                input.classList.remove('correct');
+            }
+
+            setTimeout(() => {
+                input.classList.remove('correct', 'incorrect');
+                nextQuestion();
+            }, 1200);
+        }
+
+        function nextQuestion() {
+            state.currentQuestion++;
+
+            if (state.currentQuestion >= 10) {
+                showResult();
+            } else {
+                showQuestion();
+            }
+        }
+
+        function showResult() {
+            document.getElementById('test-content').style.display = 'none';
+            document.getElementById('test-result').style.display = 'block';
+
+            const score = Math.round(state.correctAnswers / 10 * 100);
+            document.getElementById('result-score').textContent = score + '%';
+            document.getElementById('correct-count').textContent = state.correctAnswers;
+            document.getElementById('wrong-count').textContent = 10 - state.correctAnswers;
+
+            const history = JSON.parse(localStorage.getItem('toeic-test-history') || '[]');
+            history.unshift({
+                date: new Date().toISOString(),
+                score: score,
+                correct: state.correctAnswers,
+                total: 10,
+                mode: state.testMode
+            });
+            localStorage.setItem('toeic-test-history', JSON.stringify(history.slice(0, 20)));
+        }
+
+        function backToTestStart() {
+            document.getElementById('test-result').style.display = 'none';
+            document.getElementById('test-start').style.display = 'block';
+            updateTestStart();
+        }
+
+        function updateTestStart() {
+            const history = JSON.parse(localStorage.getItem('toeic-test-history') || '[]');
+            const historyList = document.getElementById('history-list');
+
+            if (history.length === 0) {
+                historyList.innerHTML = '<p style="color: var(--text-muted); font-size: 14px;">暂无测试记录</p>';
+            } else {
+                historyList.innerHTML = history.slice(0, 5).map(h => `
+                    <div class="history-item">
+                        <span class="history-date">${new Date(h.date).toLocaleDateString()}</span>
+                        <div>
+                            <span class="history-score">${h.score}%</span>
+                            <span class="history-mode">${h.mode === 'choice' ? '选择' : '听写'}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Initialize
+        loadState();
+        updateLearnPage();
+        updatePracticePage();
+        updateTestStart();
+    </script>
+</body>
+</html>
